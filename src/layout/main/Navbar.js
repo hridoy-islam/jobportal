@@ -1,16 +1,17 @@
 import { signOut } from "firebase/auth";
 import React from "react";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import auth from '../../firebase/firebase.config'
 import { Link, useLocation } from "react-router-dom";
+import { logout } from "../../features/auth/authSlice";
 
 const Navbar = () => {
   const { pathname } = useLocation();
-
-  const { email } = useSelector(state => state.auth)
+  const dispatch = useDispatch();
+  const { email, role } = useSelector(state => state.auth)
 
   const handleSignout = () => {
-    signOut();
+    signOut(auth).then(() => dispatch(logout()));
   }
 
   return (
@@ -27,17 +28,32 @@ const Navbar = () => {
             Jobs
           </Link>
         </li>
+        {email && <li>
+          <Link className='hover:text-primary' to='/dashboard'>
+            Dashboard
+          </Link>
+        </li>
+        }
+
+        {email && !role && <li>
+          <Link className='hover:text-primary' to='/register'>
+            Get Started
+          </Link>
+        </li>
+        }
+
+
 
         <li>
           {!email ? <Link className='border border-black px-2 py-1 rounded-full hover:border-primary hover:text-white hover:bg-primary hover:px-4 transition-all ' to='/login'>
             Login
           </Link>
-            : 
-          <Link className='border border-black px-2 py-1 rounded-full hover:border-primary hover:text-white hover:bg-primary hover:px-4 transition-all ' to='/logout' 
-          onClick={()=>handleSignout()}>
+            :
+            <Link className='border border-black px-2 py-1 rounded-full hover:border-primary hover:text-white hover:bg-primary hover:px-4 transition-all '
+              onClick={() => handleSignout()}>
               Logout
             </Link>
-            }
+          }
         </li>
       </ul>
     </nav>
