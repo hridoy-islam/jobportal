@@ -5,8 +5,6 @@ import { useGetJobQuery } from "../features/job/jobApi";
 const Jobs = () => {
 
   const {data} = useGetJobQuery()
-
-  console.log(data);
   
   return (
     <div className='pt-14'>

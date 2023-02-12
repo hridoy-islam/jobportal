@@ -1,12 +1,15 @@
 import React from "react";
-import {useParams} from 'react-router-dom'
+import {useNavigate, useParams} from 'react-router-dom'
 import {useJobByIdQuery} from '../features/job/jobApi'
 import meeting from "../assets/meeting.jpg";
 import { BsArrowRightShort, BsArrowReturnRight } from "react-icons/bs";
+import { useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
 const JobDetails = () => {
+  const user = useSelector(state => state.auth.user)
+  const navigate = useNavigate()
   const {id} = useParams();
-  const {data, isLoading, isError} = useJobByIdQuery(id)
-  const jobData = data?.data || {}
+  const {data} = useJobByIdQuery(id)
   const {
     companyName,
     position,
@@ -20,7 +23,25 @@ const JobDetails = () => {
     responsibilities,
     overview,
     queries,
-  } = jobData;
+    _id
+  } = data?.data || {};
+
+  const handleApply = () => {
+    if(user.role === 'employer'){
+      toast.error('You need a candidiate account');
+      return;
+    }
+    if(user.role === ''){
+      navigate('/register')
+      return;
+    }
+    const data = {
+      userId: user._id,
+      email: user.email,
+      jobId: _id,
+    };
+    console.log('clicked', data);
+  }
 
   return (
     
@@ -32,7 +53,7 @@ const JobDetails = () => {
         <div className='space-y-5'>
           <div className='flex justify-between items-center mt-5'>
             <h1 className='text-xl font-semibold text-primary'>{position}</h1>
-            <button className='btn'>Apply</button>
+            <button className='btn' onClick={handleApply}>Apply</button>
           </div>
           <div>
             <h1 className='text-primary text-lg font-medium mb-3'>Overview</h1>

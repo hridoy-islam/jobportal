@@ -42,7 +42,7 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         logout: (state) => {
-            state.user.email = "";
+            state.user = {email : "", role : ""};
         },
         setUser: (state, { payload }) => {
             state.user.email = payload;
@@ -94,7 +94,7 @@ export const authSlice = createSlice({
                 state.isLoading = false;
                 state.isError = false;
                 state.error = "";
-                state.user.email = payload;
+                state.user = payload;
             })
             .addCase(googleLogin.rejected, (state, action) => {
                 state.isLoading = false;
@@ -111,9 +111,11 @@ export const authSlice = createSlice({
                 state.isError = false;
                 state.error = "";
                 if(payload.status){
-                    state.user = payload;
+                    state.user = payload.data;
                 }
-                state.user.email = payload;
+                else{
+                    state.user.email = payload;
+                }
                 
             })
             .addCase(getUser.rejected, (state, action) => {

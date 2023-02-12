@@ -19,7 +19,7 @@ function App() {
         dispatch(toggleLoading())
       }
     })
-  }, [])
+  }, [dispatch])
 
 
 

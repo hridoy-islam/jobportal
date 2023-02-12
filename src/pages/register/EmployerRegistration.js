@@ -3,12 +3,13 @@ import { useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { FaChevronLeft } from "react-icons/fa";
 import { useRegisterMutation } from "../../features/auth/authApi";
-import {  useSelector } from "react-redux";
+import {  useDispatch, useSelector } from "react-redux";
+import { getUser } from "../../features/auth/authSlice";
 
 const EmployerRegistration = () => {
   const { email } = useSelector(state => state.auth.user)
   const [countries, setCountries] = useState([]);
-  
+  const dispatch = useDispatch()
 
   const { handleSubmit, register, control } = useForm({
     defaultValues: {
@@ -51,7 +52,6 @@ const EmployerRegistration = () => {
   const onSubmit = (data) => {
     console.log(data);
     postUser({...data, role: 'employer'});
-
   };
 
   return (

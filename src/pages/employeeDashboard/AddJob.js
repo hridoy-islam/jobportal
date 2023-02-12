@@ -5,7 +5,7 @@ import { usePostJobMutation } from "../../features/job/jobApi";
 
 const AddJob = () => {
   const [postJob, {isLoading}] = usePostJobMutation()
-  const { handleSubmit, register, control } = useForm();
+  const { handleSubmit, register, control, reset } = useForm();
   const {
     fields: resFields,
     append: resAppend,
@@ -24,7 +24,8 @@ const AddJob = () => {
 
   const onSubmit = (data) => {
     console.log(data);
-    postJob(data)
+    postJob({...data, applicants: [], queries: []})
+    reset();
   };
 
   return (
