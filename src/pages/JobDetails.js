@@ -1,8 +1,12 @@
 import React from "react";
-
+import {useParams} from 'react-router-dom'
+import {useJobByIdQuery} from '../features/job/jobApi'
 import meeting from "../assets/meeting.jpg";
 import { BsArrowRightShort, BsArrowReturnRight } from "react-icons/bs";
 const JobDetails = () => {
+  const {id} = useParams();
+  const {data, isLoading, isError} = useJobByIdQuery(id)
+  const jobData = data?.data || {}
   const {
     companyName,
     position,
@@ -16,10 +20,10 @@ const JobDetails = () => {
     responsibilities,
     overview,
     queries,
-    _id,
-  } = {};
+  } = jobData;
 
   return (
+    
     <div className='pt-14 grid grid-cols-12 gap-5'>
       <div className='col-span-9 mb-10'>
         <div className='h-80 rounded-xl overflow-hidden'>
@@ -37,7 +41,7 @@ const JobDetails = () => {
           <div>
             <h1 className='text-primary text-lg font-medium mb-3'>Skills</h1>
             <ul>
-              {skills.map((skill) => (
+              {skills?.map((skill) => (
                 <li className='flex items-center'>
                   <BsArrowRightShort /> <span>{skill}</span>
                 </li>
@@ -49,7 +53,7 @@ const JobDetails = () => {
               Requirements
             </h1>
             <ul>
-              {requirements.map((skill) => (
+              {requirements?.map((skill) => (
                 <li className='flex items-center'>
                   <BsArrowRightShort /> <span>{skill}</span>
                 </li>
@@ -61,7 +65,7 @@ const JobDetails = () => {
               Responsibilities
             </h1>
             <ul>
-              {responsibilities.map((skill) => (
+              {responsibilities?.map((skill) => (
                 <li className='flex items-center'>
                   <BsArrowRightShort /> <span>{skill}</span>
                 </li>
@@ -76,7 +80,7 @@ const JobDetails = () => {
               General Q&A
             </h1>
             <div className='text-primary my-2'>
-              {queries.map(({ question, email, reply, id }) => (
+              {queries?.map(({ question, email, reply, id }) => (
                 <div>
                   <small>{email}</small>
                   <p className='text-lg font-medium'>{question}</p>
@@ -160,7 +164,7 @@ const JobDetails = () => {
           </div>
           <div>
             <p>Website</p>
-            <a className='font-semibold text-lg' href='#'>
+            <a className='font-semibold text-lg' href='/'>
               https://website.com
             </a>
           </div>
