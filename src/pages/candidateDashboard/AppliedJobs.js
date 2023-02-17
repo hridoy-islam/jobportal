@@ -1,6 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import JobCard from "../../components/reusable/JobCard";
 import Loading from "../../components/reusable/Loading";
 import { useGetAppliedJobsQuery } from "../../features/job/jobApi";
 
@@ -15,13 +14,33 @@ const AppliedJobs = () => {
   }
 
   return (
-    <div>
+    <div className="container mx-10">
       <h1 className='text-xl py-5'>Applied jobs</h1>
-      <div className='grid grid-cols-2 gap-5 pb-5'>
-        {data?.data?.map((job) => (
-          <JobCard jobData={job} />
-        ))}
-      </div>
+
+      <table className="table-auto">
+        <thead>
+          <tr>
+            <th className='bg-primary text-white bg-primary/10 transition-all py-2 px-3 '>Position</th>
+            <th className='bg-primary text-white bg-primary/10 transition-all py-2 px-3 '>Location</th>
+            <th className='bg-primary text-white bg-primary/10 transition-all py-2 px-3 '>Type</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          {  data?.data?.map(({ _id, position, location, employmentType }) => <tr key={_id}>
+              <td className="border border-slate-600 p-2">{position}</td>
+              <td className="border border-slate-600 p-2">{location}</td>
+              <td className="border border-slate-600 p-2">{employmentType}</td>
+              
+            </tr>
+            )
+          }
+
+
+        </tbody>
+      </table>
+
+
     </div>
   );
 };

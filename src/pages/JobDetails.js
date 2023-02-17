@@ -1,15 +1,30 @@
-import React from "react";
-import {useNavigate, useParams} from 'react-router-dom'
-import {useJobByIdQuery} from '../features/job/jobApi'
+import React, { useState } from "react";
+import { useNavigate, useParams } from 'react-router-dom'
+import { useApplyJobMutation, useJobByIdQuery, useQuestionMutation, useReplyMutation } from '../features/job/jobApi'
 import meeting from "../assets/meeting.jpg";
 import { BsArrowRightShort, BsArrowReturnRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import { useForm } from "react-hook-form";
+
 const JobDetails = () => {
+  const [reply, setReply] = useState();
   const user = useSelector(state => state.auth.user)
+  const [sendQuestion] = useQuestionMutation()
+  const [sendReply] = useReplyMutation()
   const navigate = useNavigate()
-  const {id} = useParams();
-  const {data} = useJobByIdQuery(id)
+  const { id } = useParams();
+  const { data } = useJobByIdQuery(id, {
+    pollingInterval: 1000,
+  })
+  const [applyjob] = useApplyJobMutation()
+  const { register, handleSubmit, reset } = useForm();
+  const handleQuestion = (data) => {
+    const question = { ...data, userId: user._id, jobId: id, email: user.email }
+    sendQuestion(question)
+    reset();
+  }
+
   const {
     companyName,
     position,
@@ -23,15 +38,16 @@ const JobDetails = () => {
     responsibilities,
     overview,
     queries,
-    _id
+    _id,
+    applicants,
   } = data?.data || {};
 
   const handleApply = () => {
-    if(user.role === 'employer'){
+    if (user.role === 'employer') {
       toast.error('You need a candidiate account');
       return;
     }
-    if(user.role === ''){
+    if (user.role === '') {
       navigate('/register')
       return;
     }
@@ -40,11 +56,19 @@ const JobDetails = () => {
       email: user.email,
       jobId: _id,
     };
-    console.log('clicked', data);
+    applyjob(data)
+  }
+
+  const handleReply = (id) => {
+    const replayData = {
+      reply,
+      userId: id,
+    }
+    sendReply(replayData);
   }
 
   return (
-    
+
     <div className='pt-14 grid grid-cols-12 gap-5'>
       <div className='col-span-9 mb-10'>
         <div className='h-80 rounded-xl overflow-hidden'>
@@ -53,7 +77,11 @@ const JobDetails = () => {
         <div className='space-y-5'>
           <div className='flex justify-between items-center mt-5'>
             <h1 className='text-xl font-semibold text-primary'>{position}</h1>
+            <div>
+            {user.role === 'employer' && <span className="mr-1">{applicants?.length} People Applied</span> }
+            
             <button className='btn' onClick={handleApply}>Apply</button>
+            </div>
           </div>
           <div>
             <h1 className='text-primary text-lg font-medium mb-3'>Overview</h1>
@@ -62,8 +90,8 @@ const JobDetails = () => {
           <div>
             <h1 className='text-primary text-lg font-medium mb-3'>Skills</h1>
             <ul>
-              {skills?.map((skill) => (
-                <li className='flex items-center'>
+              {skills?.map((skill, i) => (
+                <li key={i} className='flex items-center'>
                   <BsArrowRightShort /> <span>{skill}</span>
                 </li>
               ))}
@@ -74,8 +102,8 @@ const JobDetails = () => {
               Requirements
             </h1>
             <ul>
-              {requirements?.map((skill) => (
-                <li className='flex items-center'>
+              {requirements?.map((skill, i) => (
+                <li key={i} className='flex items-center'>
                   <BsArrowRightShort /> <span>{skill}</span>
                 </li>
               ))}
@@ -86,8 +114,8 @@ const JobDetails = () => {
               Responsibilities
             </h1>
             <ul>
-              {responsibilities?.map((skill) => (
-                <li className='flex items-center'>
+              {responsibilities?.map((skill, i) => (
+                <li key={i} className='flex items-center'>
                   <BsArrowRightShort /> <span>{skill}</span>
                 </li>
               ))}
@@ -102,7 +130,7 @@ const JobDetails = () => {
             </h1>
             <div className='text-primary my-2'>
               {queries?.map(({ question, email, reply, id }) => (
-                <div>
+                <div key={id}>
                   <small>{email}</small>
                   <p className='text-lg font-medium'>{question}</p>
                   {reply?.map((item) => (
@@ -110,33 +138,41 @@ const JobDetails = () => {
                       <BsArrowReturnRight /> {item}
                     </p>
                   ))}
-
-                  <div className='flex gap-3 my-5'>
-                    <input placeholder='Reply' type='text' className='w-full' />
-                    <button
-                      className='shrink-0 h-14 w-14 bg-primary/10 border border-primary hover:bg-primary rounded-full transition-all  grid place-items-center text-primary hover:text-white'
-                      type='button'
-                    >
-                      <BsArrowRightShort size={30} />
-                    </button>
-                  </div>
+                  {user.role === 'employer' &&
+                    <div className='flex gap-3 my-5'>
+                      <input placeholder='Reply' type='text' className='w-full'
+                        onBlur={(e) => { setReply(e.target.value) }}
+                      />
+                      <button
+                        className='shrink-0 h-14 w-14 bg-primary/10 border border-primary hover:bg-primary rounded-full transition-all  grid place-items-center text-primary hover:text-white'
+                        type='button'
+                        onClick={() => handleReply(id)}
+                      >
+                        <BsArrowRightShort size={30} />
+                      </button>
+                    </div>
+                  }
                 </div>
               ))}
             </div>
-
-            <div className='flex gap-3 my-5'>
-              <input
-                placeholder='Ask a question...'
-                type='text'
-                className='w-full'
-              />
-              <button
-                className='shrink-0 h-14 w-14 bg-primary/10 border border-primary hover:bg-primary rounded-full transition-all  grid place-items-center text-primary hover:text-white'
-                type='button'
-              >
-                <BsArrowRightShort size={30} />
-              </button>
-            </div>
+            {user.role === 'candidate' &&
+              <form onSubmit={handleSubmit(handleQuestion)}>
+                <div className='flex gap-3 my-5'>
+                  <input
+                    placeholder='Ask a question...'
+                    type='text'
+                    className='w-full'
+                    {...register('question')}
+                  />
+                  <button
+                    className='shrink-0 h-14 w-14 bg-primary/10 border border-primary hover:bg-primary rounded-full transition-all  grid place-items-center text-primary hover:text-white'
+                    type='submit'
+                  >
+                    <BsArrowRightShort size={30} />
+                  </button>
+                </div>
+              </form>
+            }
           </div>
         </div>
       </div>
